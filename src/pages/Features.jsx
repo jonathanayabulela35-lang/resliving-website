@@ -23,13 +23,13 @@ const features = [
   {
     icon: Bell,
     title: "Messages & Announcements",
-    description: "Broadcast important notices, alerts, and updates to all residents or specific units instantly.",
+    description: "Broadcast important notices, alerts, and updates to all students instantly.",
     category: "Communication"
   },
   {
     icon: CalendarDays,
     title: "Community Events",
-    description: "Share upcoming events, activities, and community news to keep residents engaged and informed.",
+    description: "Share upcoming events, activities, and community news to keep students informed.",
     category: "Community"
   },
   {
@@ -53,7 +53,7 @@ const features = [
   {
     icon: Lock,
     title: "Code-Based Access",
-    description: "Unique permanent codes for students and security. Only authorised users can join your building.",
+    description: "Unique permanent codes for students and security. You are linked to all your unit student residents and security gaurds.",
     category: "Security"
   },
   {
