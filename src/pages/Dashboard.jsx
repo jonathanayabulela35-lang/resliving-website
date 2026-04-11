@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Building2, Plus, Wrench } from 'lucide-react';
+import { Plus, Wrench, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ResidenceSelector from '../components/dashboard/ResidenceSelector';
 import SubscriptionCard from '../components/dashboard/SubscriptionCard';
@@ -12,12 +12,12 @@ import { supabase } from '@/lib/supabase';
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [residences, setResidences] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [units, setUnits] = useState([]);
   const [maintenanceRequests, setMaintenanceRequests] = useState([]);
-  const [maintenanceTab, setMaintenanceTab] = useState('pending');
   const [loading, setLoading] = useState(true);
   const [maintenanceLoading, setMaintenanceLoading] = useState(false);
 
@@ -55,12 +55,7 @@ export default function Dashboard() {
       }));
 
       setResidences(allResidences);
-
-      if (allResidences.length > 0) {
-        setSelectedId(allResidences[0].id);
-      } else {
-        setSelectedId(null);
-      }
+      setSelectedId(allResidences.length > 0 ? allResidences[0].id : null);
     } finally {
       setLoading(false);
     }
@@ -94,19 +89,20 @@ export default function Dashboard() {
 
   const selectedResidence = residences.find((r) => r.id === selectedId);
 
-  const pendingRequests = useMemo(
-    () => maintenanceRequests.filter((request) => request.status === 'pending'),
+  const recentMaintenance = useMemo(
+    () => maintenanceRequests.slice(0, 3),
     [maintenanceRequests]
   );
 
-  const completedRequests = useMemo(
-    () =>
-      maintenanceRequests.filter((request) => request.status === 'completed'),
+  const pendingCount = useMemo(
+    () => maintenanceRequests.filter((request) => request.status === 'pending').length,
     [maintenanceRequests]
   );
 
-  const displayedRequests =
-    maintenanceTab === 'pending' ? pendingRequests : completedRequests;
+  const completedCount = useMemo(
+    () => maintenanceRequests.filter((request) => request.status === 'completed').length,
+    [maintenanceRequests]
+  );
 
   if (loading) {
     return (
@@ -173,24 +169,29 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="mt-6 p-6 rounded-2xl border border-border bg-card">
-          <div className="flex items-center gap-2 mb-5">
-            <Wrench className="w-4 h-4 text-primary" />
-            <h3 className="text-base font-semibold text-foreground">
-              Maintenance Requests
-            </h3>
+        <button
+          onClick={() => navigate('/manager/maintenance')}
+          className="mt-6 w-full text-left p-6 rounded-2xl border border-border bg-card hover:border-primary/30 transition-colors"
+        >
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-2">
+              <Wrench className="w-4 h-4 text-primary" />
+              <h3 className="text-base font-semibold text-foreground">
+                Maintenance Requests
+              </h3>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </div>
 
-          <div className="rounded-xl border border-dashed border-border p-8 text-center">
+          <div className="rounded-xl border border-dashed border-border p-6 text-center">
             <p className="text-sm font-medium text-foreground">
               No maintenance requests yet
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              Requests will appear here once residents are linked and begin
-              submitting them.
+              Requests will appear here once residents are linked and begin submitting them.
             </p>
           </div>
-        </div>
+        </button>
       </div>
     );
   }
@@ -278,7 +279,10 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="mt-6 p-6 rounded-2xl border border-border bg-card">
+          <button
+            onClick={() => navigate('/manager/maintenance')}
+            className="mt-6 w-full text-left p-6 rounded-2xl border border-border bg-card hover:border-primary/30 transition-colors"
+          >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
               <div className="flex items-center gap-2">
                 <Wrench className="w-4 h-4 text-primary" />
@@ -287,59 +291,38 @@ export default function Dashboard() {
                 </h3>
               </div>
 
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant={maintenanceTab === 'pending' ? 'default' : 'outline'}
-                  className={
-                    maintenanceTab === 'pending'
-                      ? 'bg-primary hover:bg-primary/90'
-                      : ''
-                  }
-                  onClick={() => setMaintenanceTab('pending')}
-                >
-                  Pending ({pendingRequests.length})
-                </Button>
-
-                <Button
-                  size="sm"
-                  variant={
-                    maintenanceTab === 'completed' ? 'default' : 'outline'
-                  }
-                  className={
-                    maintenanceTab === 'completed'
-                      ? 'bg-primary hover:bg-primary/90'
-                      : ''
-                  }
-                  onClick={() => setMaintenanceTab('completed')}
-                >
-                  Completed ({completedRequests.length})
-                </Button>
+              <div className="flex gap-2 text-xs">
+                <span className="inline-flex items-center rounded-full px-2.5 py-1 bg-primary/10 text-primary font-medium">
+                  Pending ({pendingCount})
+                </span>
+                <span className="inline-flex items-center rounded-full px-2.5 py-1 bg-muted text-foreground font-medium">
+                  Completed ({completedCount})
+                </span>
               </div>
             </div>
 
             {maintenanceLoading ? (
-              <div className="py-8 flex items-center justify-center">
+              <div className="py-6 flex items-center justify-center">
                 <div className="w-6 h-6 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
               </div>
-            ) : displayedRequests.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border p-8 text-center">
+            ) : recentMaintenance.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border p-6 text-center">
                 <p className="text-sm font-medium text-foreground">
-                  No {maintenanceTab} maintenance requests
+                  No maintenance requests yet
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Requests for this building will appear here.
+                  Click to open the full maintenance page when requests start coming in.
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {displayedRequests.map((request) => (
+              <div className="space-y-3">
+                {recentMaintenance.map((request) => (
                   <div
                     key={request.id}
                     className="rounded-xl border border-border p-4"
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                      <div>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-primary/10 text-primary capitalize">
                             {request.status}
@@ -349,42 +332,22 @@ export default function Dashboard() {
                           </span>
                         </div>
 
-                        <p className="text-sm font-semibold text-foreground mt-3">
-                          Unit {request.unit_number}
+                        <p className="text-sm font-semibold text-foreground mt-2 truncate">
+                          Unit {request.unit_number} · {request.student_name || 'Student'}
                         </p>
 
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {request.student_name || 'Student'} ·{' '}
-                          {request.student_email}
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+                          {request.details}
                         </p>
                       </div>
 
-                      {request.created_at ? (
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(request.created_at).toLocaleString()}
-                        </p>
-                      ) : null}
+                      <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
                     </div>
-
-                    <p className="text-sm text-foreground mt-3 leading-relaxed">
-                      {request.details}
-                    </p>
-
-                    {request.image_url ? (
-                      <a
-                        href={request.image_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex mt-3 text-sm text-primary hover:underline"
-                      >
-                        View attached image
-                      </a>
-                    ) : null}
                   </div>
                 ))}
               </div>
             )}
-          </div>
+          </button>
 
           <CodeDisplay residence={selectedResidence} units={units} />
         </motion.div>
