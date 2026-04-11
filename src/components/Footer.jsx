@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import logo from "@/assets/resliving-logo.svg";
 
 const footerLinks = {
   Product: [
@@ -22,16 +23,17 @@ export default function Footer() {
     <footer className="bg-primary text-primary-foreground">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+          
           {/* Brand */}
           <div className="lg:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">R</span>
-              </div>
-              <span className="text-xl font-bold tracking-tight">
-                Res<span className="text-destructive">Living</span>
-              </span>
+            <div className="mb-4">
+              <img
+                src={logo}
+                alt="ResLiving"
+                className="h-10 w-auto"
+              />
             </div>
+
             <p className="text-sm text-white/60 leading-relaxed max-w-xs">
               Simplifying student accommodation management with smart technology, secure access, and seamless communication.
             </p>
