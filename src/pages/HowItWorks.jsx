@@ -16,7 +16,7 @@ const steps = [
     icon: CreditCard,
     step: "2",
     title: "Purchase Student Codes",
-    description: "The manager selects how many student codes they need. Each code costs R150/month. They can purchase fewer codes than total units if needed. Security code is always included free.",
+    description: "The manager selects how many student codes they need. Each code costs R150/month. They can purchase fewer codes than total units if needed. Security code is always included for free.",
     color: "bg-primary"
   },
   {
