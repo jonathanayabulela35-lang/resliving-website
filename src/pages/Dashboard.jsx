@@ -30,6 +30,9 @@ export default function Dashboard() {
     if (selectedId) {
       loadUnits(selectedId);
       loadMaintenanceRequests(selectedId);
+    } else {
+      setUnits([]);
+      setMaintenanceRequests([]);
     }
   }, [selectedId]);
 
@@ -56,6 +59,8 @@ export default function Dashboard() {
 
       if (allResidences.length > 0) {
         setSelectedId(allResidences[0].id);
+      } else {
+        setSelectedId(null);
       }
     } finally {
       setLoading(false);
@@ -119,26 +124,88 @@ export default function Dashboard() {
 
   if (residences.length === 0) {
     return (
-      <div className="py-20 lg:py-28">
-        <div className="max-w-md mx-auto px-4 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto mb-6">
-            <Building2 className="w-7 h-7 text-primary" />
+      <div className="py-10 lg:py-16">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8"
+          >
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">
+                Manager Dashboard
+              </h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Welcome back
+                {user?.user_metadata?.full_name
+                  ? `, ${user.user_metadata.full_name}`
+                  : ''}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="sm" onClick={handleLogout}>
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </div>
+          </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div className="p-6 rounded-2xl border border-border bg-card">
+              <h3 className="text-sm font-semibold text-foreground mb-3">
+                Building Info
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                No building has been set up yet.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl border border-border bg-card">
+              <h3 className="text-sm font-semibold text-foreground mb-3">
+                Subscription
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Subscription details will appear after building setup.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl border border-border bg-card">
+              <h3 className="text-sm font-semibold text-foreground mb-3">
+                Quick Actions
+              </h3>
+              <div className="space-y-2">
+                <Link to="/get-started">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
+                    <Plus className="w-3.5 h-3.5 mr-2" />
+                    Set Up Your First Building
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">
-            No Buildings Yet
-          </h2>
-          <p className="text-sm text-muted-foreground mb-8">
-            Set up your first building to get started with ResLiving.
-          </p>
-          <Link to="/get-started">
-            <Button
-              size="lg"
-              className="bg-destructive hover:bg-destructive/90 text-white h-12 px-8 text-base font-semibold"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Set Up Your Building
-            </Button>
-          </Link>
+
+          <div className="mt-6 p-6 rounded-2xl border border-border bg-card">
+            <div className="flex items-center gap-2 mb-5">
+              <Wrench className="w-4 h-4 text-primary" />
+              <h3 className="text-base font-semibold text-foreground">
+                Maintenance Requests
+              </h3>
+            </div>
+
+            <div className="rounded-xl border border-dashed border-border p-8 text-center">
+              <p className="text-sm font-medium text-foreground">
+                No maintenance requests yet
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Requests will appear here once residents are linked and begin
+                submitting them.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -230,8 +297,6 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-
-            <CodeDisplay residence={selectedResidence} units={units} />
 
             <div className="mt-6 p-6 rounded-2xl border border-border bg-card">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
@@ -340,6 +405,8 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
+
+            <CodeDisplay residence={selectedResidence} units={units} />
           </motion.div>
         )}
       </div>
