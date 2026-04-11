@@ -126,12 +126,34 @@ export default function BuildingDetailsStep({ data, setData, onNext }) {
                 placeholder="+27..."
               />
             </div>
+          </div>
+        </div>
+
+        <div className="border-t border-border pt-5">
+          <p className="text-sm font-semibold text-foreground mb-4">Emergency Contacts</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <Label className="text-sm font-medium mb-1.5 block">Emergency Contacts</Label>
+              <Label className="text-sm font-medium mb-1.5 block">Ambulance</Label>
               <Input
-                value={data.emergency_contacts || ''}
-                onChange={(e) => update('emergency_contacts', e.target.value)}
-                placeholder="Optional"
+                value={data.emergency_ambulance || ''}
+                onChange={(e) => update('emergency_ambulance', e.target.value)}
+                placeholder="Enter ambulance contact"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-1.5 block">Fire Department</Label>
+              <Input
+                value={data.emergency_fire || ''}
+                onChange={(e) => update('emergency_fire', e.target.value)}
+                placeholder="Enter fire department contact"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-1.5 block">Police</Label>
+              <Input
+                value={data.emergency_police || ''}
+                onChange={(e) => update('emergency_police', e.target.value)}
+                placeholder="Enter police contact"
               />
             </div>
           </div>
