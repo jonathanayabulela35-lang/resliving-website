@@ -24,7 +24,9 @@ export default function GetStarted() {
     manager_name: user?.user_metadata?.full_name || '',
     manager_email: user?.email || '',
     manager_phone: '',
-    emergency_contacts: '',
+    emergency_ambulance: '',
+    emergency_fire: '',
+    emergency_police: '',
     max_visitors: 3,
     sleepover_fee: 0,
     house_rules_url: '',
@@ -77,7 +79,9 @@ export default function GetStarted() {
     <div className="py-16 lg:py-24 min-h-[80vh]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Set Up Your Building</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+            Set Up Your Building
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">
             Complete the steps below to get started with ResLiving
           </p>
@@ -98,6 +102,7 @@ export default function GetStarted() {
               onNext={() => setStep(2)}
             />
           )}
+
           {step === 2 && (
             <ChooseCodesStep
               data={data}
@@ -106,6 +111,7 @@ export default function GetStarted() {
               onBack={() => setStep(1)}
             />
           )}
+
           {step === 3 && (
             <ReviewStep
               data={data}
@@ -113,6 +119,7 @@ export default function GetStarted() {
               onBack={() => setStep(2)}
             />
           )}
+
           {step === 4 && (
             <PaymentStep
               data={data}
