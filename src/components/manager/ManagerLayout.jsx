@@ -28,20 +28,20 @@ export default function ManagerLayout() {
   };
 
   return (
-    <div className="py-8 lg:py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-6">
-          <aside className="rounded-2xl border border-border bg-card p-4 h-fit lg:sticky lg:top-24">
-            <div className="mb-5 pb-4 border-b border-border">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+    <div className="min-h-[calc(100vh-5rem)] lg:min-h-[calc(100vh-5rem)]">
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] min-h-[calc(100vh-5rem)]">
+        <aside className="bg-[#D2042D] text-white lg:min-h-[calc(100vh-5rem)] lg:sticky lg:top-20">
+          <div className="flex h-full flex-col px-6 py-8">
+            <div className="pb-6 border-b border-white/15">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">
                 Manager Area
               </p>
-              <p className="text-sm font-medium text-foreground mt-2">
+              <p className="text-lg font-semibold mt-3 text-white">
                 {user?.user_metadata?.full_name || user?.email || 'Manager'}
               </p>
             </div>
 
-            <nav className="space-y-1">
+            <nav className="mt-6 space-y-2">
               {navItems.map((item) => {
                 const Icon = item.icon;
 
@@ -50,10 +50,10 @@ export default function ManagerLayout() {
                     key={item.path}
                     to={item.path}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                      `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
                         isActive
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                          ? 'bg-white text-[#D2042D] shadow-sm'
+                          : 'text-white/85 hover:bg-white/10 hover:text-white'
                       }`
                     }
                   >
@@ -64,22 +64,24 @@ export default function ManagerLayout() {
               })}
             </nav>
 
-            <div className="mt-5 pt-4 border-t border-border">
+            <div className="mt-auto pt-6 border-t border-white/15">
               <Button
-                variant="outline"
-                className="w-full justify-start"
+                variant="ghost"
+                className="w-full justify-start text-white hover:bg-white/10 hover:text-white"
                 onClick={handleLogout}
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
               </Button>
             </div>
-          </aside>
+          </div>
+        </aside>
 
-          <main className="min-w-0">
+        <main className="min-w-0 bg-background">
+          <div className="px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
             <Outlet />
-          </main>
-        </div>
+          </div>
+        </main>
       </div>
     </div>
   );
