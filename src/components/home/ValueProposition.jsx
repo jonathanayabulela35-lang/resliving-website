@@ -16,22 +16,22 @@ const values = [
   {
     icon: Bell,
     title: "Announcements",
-    description: "Broadcast important messages and updates to all residents instantly."
+    description: "Broadcast important messages and updates to all students instantly."
   },
   {
     icon: FileText,
     title: "House Rules Access",
-    description: "Digitised house rules always available. No more lost paperwork or confusion."
+    description: "Digitised house rules always available. No more notice board paper mess and confusion."
   },
   {
     icon: Users,
     title: "Community Events",
-    description: "Keep residents engaged with community news, events, and building updates."
+    description: "Give students awareness of community news, events, and building updates."
   },
   {
     icon: Lock,
     title: "Code-Based Access",
-    description: "Unique codes for students and security ensure only authorised people join your building."
+    description: "Unique codes for students and security ensure building access and management through ResLiving."
   },
 ];
 
@@ -42,7 +42,7 @@ export default function ValueProposition() {
         <SectionHeading
           badge="Why ResLiving"
           title="Everything Your Building Needs"
-          description="A complete management platform designed specifically for student accommodation and residential buildings."
+          description="A complete management platform designed specifically for student accommodation buildings."
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">

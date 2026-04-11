@@ -12,7 +12,9 @@ function normalizeResidence(row) {
     building_name: row.building_name ?? row.name,
     building_address: row.building_address ?? row.address,
     number_of_units: row.number_of_units ?? row.num_units,
-    monthly_total: row.monthly_total ?? (Number(row.codes_purchased || row.student_code_limit || 0) * 150),
+    monthly_total:
+      row.monthly_total ??
+      (Number(row.codes_purchased || row.student_code_limit || 0) * 150),
     student_code_limit: row.student_code_limit ?? row.codes_purchased ?? 0,
     created_date: row.created_at,
     updated_date: row.updated_at,
@@ -45,7 +47,9 @@ function mapResidencePayload(payload) {
     manager_name: payload.manager_name,
     manager_email: payload.manager_email,
     manager_phone: payload.manager_phone,
-    emergency_contacts: payload.emergency_contacts,
+    emergency_ambulance: payload.emergency_ambulance,
+    emergency_fire: payload.emergency_fire,
+    emergency_police: payload.emergency_police,
     max_visitors: payload.max_visitors,
     sleepover_fee: payload.sleepover_fee,
     house_rules_url: payload.house_rules_url,
@@ -75,7 +79,11 @@ function parseSort(sort) {
   if (!sort) return null;
   const descending = sort.startsWith('-');
   const key = descending ? sort.slice(1) : sort;
-  const mapping = { created_date: 'created_at', unit_label: 'unit_number', building_name: 'name' };
+  const mapping = {
+    created_date: 'created_at',
+    unit_label: 'unit_number',
+    building_name: 'name',
+  };
   return { column: mapping[key] || key, ascending: !descending };
 }
 
@@ -86,7 +94,10 @@ async function getUser() {
 }
 
 async function signIn({ email, password }) {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
   if (error) throw error;
   return data;
 }
@@ -114,47 +125,107 @@ function entity(name) {
       if (error) throw error;
       return (data || []).map((row) => normalize(table, row));
     },
+
     async filter(criteria = {}, sort) {
       let query = supabase.from(table).select('*');
+
       Object.entries(criteria).forEach(([key, value]) => {
         if (value === undefined || value === null || value === '') return;
-        const columnMap = table === 'residences'
-          ? { building_name: 'name', building_address: 'address', number_of_units: 'num_units' }
-          : { unit_label: 'unit_number' };
+
+        const columnMap =
+          table === 'residences'
+            ? {
+                building_name: 'name',
+                building_address: 'address',
+                number_of_units: 'num_units',
+              }
+            : { unit_label: 'unit_number' };
+
         query = query.eq(columnMap[key] || key, value);
       });
+
       const sortConfig = parseSort(sort);
-      if (sortConfig) query = query.order(sortConfig.column, { ascending: sortConfig.ascending });
+      if (sortConfig) {
+        query = query.order(sortConfig.column, {
+          ascending: sortConfig.ascending,
+        });
+      }
+
       const { data, error } = await query;
       if (error) throw error;
       return (data || []).map((row) => normalize(table, row));
     },
+
     async create(payload) {
-      const mapped = table === 'residences' ? mapResidencePayload(payload) : mapUnitPayload(payload);
-      const { data, error } = await supabase.from(table).insert(mapped).select('*').single();
+      const mapped =
+        table === 'residences'
+          ? mapResidencePayload(payload)
+          : mapUnitPayload(payload);
+
+      const { data, error } = await supabase
+        .from(table)
+        .insert(mapped)
+        .select('*')
+        .single();
+
       if (error) throw error;
       return normalize(table, data);
     },
+
     async bulkCreate(payloads) {
-      const mapped = payloads.map((payload) => table === 'residences' ? mapResidencePayload(payload) : mapUnitPayload(payload));
-      const { data, error } = await supabase.from(table).insert(mapped).select('*');
+      const mapped = payloads.map((payload) =>
+        table === 'residences'
+          ? mapResidencePayload(payload)
+          : mapUnitPayload(payload)
+      );
+
+      const { data, error } = await supabase
+        .from(table)
+        .insert(mapped)
+        .select('*');
+
       if (error) throw error;
       return (data || []).map((row) => normalize(table, row));
     },
+
     async update(id, payload) {
-      const mapped = table === 'residences' ? mapResidencePayload(payload) : mapUnitPayload(payload);
-      const { data, error } = await supabase.from(table).update(mapped).eq('id', id).select('*').single();
+      const mapped =
+        table === 'residences'
+          ? mapResidencePayload(payload)
+          : mapUnitPayload(payload);
+
+      const { data, error } = await supabase
+        .from(table)
+        .update(mapped)
+        .eq('id', id)
+        .select('*')
+        .single();
+
       if (error) throw error;
       return normalize(table, data);
     },
   };
 }
 
-async function uploadAsset({ file, category = 'uploads', residenceId = 'unassigned', userId = 'anonymous', bucket = 'app-uploads' }) {
+async function uploadAsset({
+  file,
+  category = 'uploads',
+  residenceId = 'unassigned',
+  userId = 'anonymous',
+  bucket = 'app-uploads',
+}) {
   const ext = file.name.split('.').pop() || 'bin';
-  const path = `${category}/${residenceId}/${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext.toLowerCase()}`;
-  const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false, contentType: file.type || 'application/octet-stream' });
+  const path = `${category}/${residenceId}/${userId}/${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2)}.${ext.toLowerCase()}`;
+
+  const { error } = await supabase.storage.from(bucket).upload(path, file, {
+    upsert: false,
+    contentType: file.type || 'application/octet-stream',
+  });
+
   if (error) throw error;
+
   const { data } = supabase.storage.from(bucket).getPublicUrl(path);
   return { file_url: data.publicUrl, path };
 }

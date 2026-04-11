@@ -15,7 +15,7 @@ const steps = [
     icon: QrCode,
     step: "02",
     title: "Codes Are Generated",
-    description: "Unique codes are generated for each student unit and one security code for the building."
+    description: "Unique codes are generated for each student unit and one security code for all the building guards."
   },
   {
     icon: Smartphone,

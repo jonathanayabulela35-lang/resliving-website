@@ -21,11 +21,12 @@ export default function GetStarted() {
     building_address: '',
     number_of_units: 0,
     numbering_format: 'numeric',
-    numbering_start: '1',
     manager_name: user?.user_metadata?.full_name || '',
     manager_email: user?.email || '',
     manager_phone: '',
-    emergency_contacts: '',
+    emergency_ambulance: '',
+    emergency_fire: '',
+    emergency_police: '',
     max_visitors: 3,
     sleepover_fee: 0,
     house_rules_url: '',
@@ -62,7 +63,7 @@ export default function GetStarted() {
       monthly_total: total,
     });
 
-    const labels = generateUnitLabels(codeLimit, data.numbering_format, data.numbering_start);
+    const labels = generateUnitLabels(codeLimit, data.numbering_format);
     const units = labels.map((label) => ({
       residence_id: residence.id,
       unit_label: label,
@@ -78,17 +79,54 @@ export default function GetStarted() {
     <div className="py-16 lg:py-24 min-h-[80vh]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Set Up Your Building</h1>
-          <p className="text-sm text-muted-foreground mt-1">Complete the steps below to get started with ResLiving</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+            Set Up Your Building
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Complete the steps below to get started with ResLiving
+          </p>
         </div>
 
         <StepIndicator currentStep={step} />
 
-        <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}>
-          {step === 1 && <BuildingDetailsStep data={data} setData={setData} onNext={() => setStep(2)} />}
-          {step === 2 && <ChooseCodesStep data={data} setData={setData} onNext={() => setStep(3)} onBack={() => setStep(1)} />}
-          {step === 3 && <ReviewStep data={data} onNext={() => setStep(4)} onBack={() => setStep(2)} />}
-          {step === 4 && <PaymentStep data={data} onBack={() => setStep(3)} onComplete={handleComplete} />}
+        <motion.div
+          key={step}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {step === 1 && (
+            <BuildingDetailsStep
+              data={data}
+              setData={setData}
+              onNext={() => setStep(2)}
+            />
+          )}
+
+          {step === 2 && (
+            <ChooseCodesStep
+              data={data}
+              setData={setData}
+              onNext={() => setStep(3)}
+              onBack={() => setStep(1)}
+            />
+          )}
+
+          {step === 3 && (
+            <ReviewStep
+              data={data}
+              onNext={() => setStep(4)}
+              onBack={() => setStep(2)}
+            />
+          )}
+
+          {step === 4 && (
+            <PaymentStep
+              data={data}
+              onBack={() => setStep(3)}
+              onComplete={handleComplete}
+            />
+          )}
         </motion.div>
       </div>
     </div>

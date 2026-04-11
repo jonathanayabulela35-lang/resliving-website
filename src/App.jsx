@@ -27,7 +27,29 @@ function ProtectedRoute({ children }) {
   const location = useLocation();
 
   if (isLoadingAuth) return <LoadingScreen />;
-  if (!isAuthenticated) return <Navigate to="/manager-login" replace state={{ from: location.pathname }} />;
+
+  if (!isAuthenticated) {
+    return (
+      <Navigate
+        to="/manager-login"
+        replace
+        state={{ from: location.pathname }}
+      />
+    );
+  }
+
+  return children;
+}
+
+function PublicOnlyRoute({ children }) {
+  const { isAuthenticated, isLoadingAuth } = useAuth();
+
+  if (isLoadingAuth) return <LoadingScreen />;
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return children;
 }
 
@@ -40,9 +62,30 @@ function AppRoutes() {
         <Route path="/features" element={<Features />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/manager-login" element={<ManagerLogin />} />
-        <Route path="/get-started" element={<ProtectedRoute><GetStarted /></ProtectedRoute>} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route
+          path="/manager-login"
+          element={
+            <PublicOnlyRoute>
+              <ManagerLogin />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/get-started"
+          element={
+            <ProtectedRoute>
+              <GetStarted />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>
