@@ -31,11 +31,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
           <Link to="/" className="flex items-center">
-            <img
-              src={logo}
-              alt="ResLiving"
-              className="h-10 w-auto"
-            />
+            <img src={logo} alt="ResLiving" className="h-10 w-auto" />
           </Link>
 
           <div className="hidden lg:flex items-center gap-1">
@@ -81,7 +77,7 @@ export default function Navbar() {
                 >
                   Logout
                 </Button>
-                <Link to="/dashboard">
+                <Link to="/manager/dashboard">
                   <Button
                     size="sm"
                     className="bg-destructive hover:bg-destructive/90 text-destructive-foreground px-6"
@@ -153,7 +149,7 @@ export default function Navbar() {
                     >
                       Logout
                     </Button>
-                    <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
+                    <Link to="/manager/dashboard" onClick={() => setMobileOpen(false)}>
                       <Button
                         className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground"
                         size="sm"
