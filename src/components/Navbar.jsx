@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/lib/AuthContext";
 
 const navLinks = [
   { label: "Home", path: "/" },
@@ -15,12 +16,19 @@ const navLinks = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    setMobileOpen(false);
+    navigate("/");
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-border/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">R</span>
@@ -30,7 +38,6 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link
@@ -47,21 +54,45 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* CTA */}
           <div className="hidden lg:flex items-center gap-3">
-            <Link to="/manager-login">
-              <Button variant="ghost" size="sm" className="text-sm font-medium">
-                Manager Login
-              </Button>
-            </Link>
-            <Link to="/get-started">
-              <Button size="sm" className="bg-destructive hover:bg-destructive/90 text-destructive-foreground px-6">
-                Get Started
-              </Button>
-            </Link>
+            {!isAuthenticated ? (
+              <>
+                <Link to="/manager-login">
+                  <Button variant="ghost" size="sm" className="text-sm font-medium">
+                    Manager Login
+                  </Button>
+                </Link>
+                <Link to="/get-started">
+                  <Button
+                    size="sm"
+                    className="bg-destructive hover:bg-destructive/90 text-destructive-foreground px-6"
+                  >
+                    Get Started
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-sm font-medium"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </Button>
+                <Link to="/dashboard">
+                  <Button
+                    size="sm"
+                    className="bg-destructive hover:bg-destructive/90 text-destructive-foreground px-6"
+                  >
+                    Dashboard
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
-          {/* Mobile Toggle */}
           <button
             className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -71,7 +102,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -95,17 +125,44 @@ export default function Navbar() {
                   {link.label}
                 </Link>
               ))}
+
               <div className="pt-3 space-y-2">
-                <Link to="/manager-login" onClick={() => setMobileOpen(false)}>
-                  <Button variant="outline" className="w-full" size="sm">
-                    Manager Login
-                  </Button>
-                </Link>
-                <Link to="/get-started" onClick={() => setMobileOpen(false)}>
-                  <Button className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground" size="sm">
-                    Get Started
-                  </Button>
-                </Link>
+                {!isAuthenticated ? (
+                  <>
+                    <Link to="/manager-login" onClick={() => setMobileOpen(false)}>
+                      <Button variant="outline" className="w-full" size="sm">
+                        Manager Login
+                      </Button>
+                    </Link>
+                    <Link to="/get-started" onClick={() => setMobileOpen(false)}>
+                      <Button
+                        className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                        size="sm"
+                      >
+                        Get Started
+                      </Button>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      size="sm"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </Button>
+                    <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
+                      <Button
+                        className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                        size="sm"
+                      >
+                        Dashboard
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
