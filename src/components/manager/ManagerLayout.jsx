@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
+  Wrench,
   Users,
   MessageSquare,
   Newspaper,
@@ -12,6 +13,7 @@ import { useAuth } from '@/lib/AuthContext';
 
 const navItems = [
   { label: 'Dashboard', path: '/manager/dashboard', icon: LayoutDashboard },
+  { label: 'Maintenance', path: '/manager/maintenance', icon: Wrench },
   { label: 'Visitors', path: '/manager/visitors', icon: Users },
   { label: 'Messages', path: '/manager/messages', icon: MessageSquare },
   { label: 'Community', path: '/manager/community', icon: Newspaper },
@@ -52,7 +54,7 @@ export default function ManagerLayout() {
                     className={({ isActive }) =>
                       `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
                         isActive
-                          ? 'bg-white text-[#D2042D] shadow-sm'
+                          ? 'bg-[#4169E1] text-white shadow-sm'
                           : 'text-white/85 hover:bg-white/10 hover:text-white'
                       }`
                     }
