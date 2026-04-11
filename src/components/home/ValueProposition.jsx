@@ -31,7 +31,7 @@ const values = [
   {
     icon: Lock,
     title: "Code-Based Access",
-    description: "Unique codes for students and security ensure building access and management through ResLiving.
+    description: "Unique codes for students and security ensure building access and management through ResLiving."
   },
 ];
 
