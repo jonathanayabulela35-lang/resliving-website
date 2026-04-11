@@ -4,6 +4,7 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/AuthContext";
+import logo from "@/assets/resliving-logo.svg";
 
 const navLinks = [
   { label: "Home", path: "/" },
@@ -29,13 +30,12 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-border/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">R</span>
-            </div>
-            <span className="text-xl font-bold text-primary tracking-tight">
-              Res<span className="text-destructive">Living</span>
-            </span>
+          <Link to="/" className="flex items-center">
+            <img
+              src={logo}
+              alt="ResLiving"
+              className="h-10 w-auto"
+            />
           </Link>
 
           <div className="hidden lg:flex items-center gap-1">
