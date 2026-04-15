@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
@@ -92,6 +93,14 @@ export default function Features() {
 
   return (
     <div className="py-20 lg:py-28">
+      <Helmet>
+        <title>Features | ResLiving</title>
+        <meta
+          name="description"
+          content="Explore ResLiving features for student accommodation management, including visitor management, maintenance requests, communication tools, security verification, and code-based access."
+        />
+      </Helmet>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           badge="Features"
