@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -74,6 +75,14 @@ export default function HowItWorks() {
 
   return (
     <div className="py-20 lg:py-28">
+      <Helmet>
+        <title>How It Works | ResLiving</title>
+        <meta
+          name="description"
+          content="Learn how ResLiving works for student accommodation management. From setup and code generation to student access, security verification, and subscription control."
+        />
+      </Helmet>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           badge="How It Works"

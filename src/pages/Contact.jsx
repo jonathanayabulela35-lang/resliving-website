@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,14 @@ export default function Contact() {
 
   return (
     <div className="py-20 lg:py-28">
+      <Helmet>
+        <title>Contact | ResLiving</title>
+        <meta
+          name="description"
+          content="Contact ResLiving for student accommodation management solutions, partnerships, demos, or support. We’re here to help you manage your building efficiently."
+        />
+      </Helmet>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           badge="Contact"
@@ -91,7 +100,6 @@ export default function Contact() {
             )}
           </motion.div>
 
-          {/* Contact Info */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}

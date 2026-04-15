@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +43,14 @@ export default function Pricing() {
 
   return (
     <div className="py-20 lg:py-28">
+      <Helmet>
+        <title>Pricing | ResLiving</title>
+        <meta
+          name="description"
+          content="View ResLiving pricing for student accommodation management. Simple monthly pricing per student unit with no hidden fees. Calculate your building cost instantly."
+        />
+      </Helmet>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           badge="Pricing"
