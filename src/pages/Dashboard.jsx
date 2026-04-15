@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Building2, Plus, LogOut } from 'lucide-react';
+import { Plus, Wrench, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ResidenceSelector from '../components/dashboard/ResidenceSelector';
 import SubscriptionCard from '../components/dashboard/SubscriptionCard';
@@ -11,19 +11,28 @@ import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/lib/supabase';
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+
   const [residences, setResidences] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [units, setUnits] = useState([]);
+  const [maintenanceRequests, setMaintenanceRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [maintenanceLoading, setMaintenanceLoading] = useState(false);
 
   useEffect(() => {
     if (user?.email) loadData();
   }, [user?.email]);
 
   useEffect(() => {
-    if (selectedId) loadUnits(selectedId);
+    if (selectedId) {
+      loadUnits(selectedId);
+      loadMaintenanceRequests(selectedId);
+    } else {
+      setUnits([]);
+      setMaintenanceRequests([]);
+    }
   }, [selectedId]);
 
   const loadData = async () => {
@@ -33,83 +42,316 @@ export default function Dashboard() {
         .select('*')
         .or(`owner_email.eq.${user.email},manager_email.eq.${user.email}`)
         .order('created_at', { ascending: false });
+
       if (error) throw error;
+
       const allResidences = (data || []).map((row) => ({
         ...row,
         building_name: row.name,
         building_address: row.address,
         number_of_units: row.num_units,
-        monthly_total: Number(row.codes_purchased || row.student_code_limit || 0) * 150,
+        monthly_total:
+          Number(row.codes_purchased || row.student_code_limit || 0) * 150,
       }));
+
       setResidences(allResidences);
-      if (allResidences.length > 0) setSelectedId(allResidences[0].id);
+      setSelectedId(allResidences.length > 0 ? allResidences[0].id : null);
     } finally {
       setLoading(false);
     }
   };
 
   const loadUnits = async (resId) => {
-    const allUnits = await api.entities.Unit.filter({ residence_id: resId }, 'unit_label');
+    const allUnits = await api.entities.Unit.filter(
+      { residence_id: resId },
+      'unit_label'
+    );
     setUnits(allUnits);
+  };
+
+  const loadMaintenanceRequests = async (resId) => {
+    try {
+      setMaintenanceLoading(true);
+
+      const { data, error } = await supabase
+        .from('maintenance_requests')
+        .select('*')
+        .eq('residence_id', resId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setMaintenanceRequests(data || []);
+    } finally {
+      setMaintenanceLoading(false);
+    }
   };
 
   const selectedResidence = residences.find((r) => r.id === selectedId);
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
-  };
+  const recentMaintenance = useMemo(
+    () => maintenanceRequests.slice(0, 3),
+    [maintenanceRequests]
+  );
 
-  if (loading) return <div className="min-h-[60vh] flex items-center justify-center"><div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" /></div>;
+  const pendingCount = useMemo(
+    () => maintenanceRequests.filter((request) => request.status === 'pending').length,
+    [maintenanceRequests]
+  );
+
+  const completedCount = useMemo(
+    () => maintenanceRequests.filter((request) => request.status === 'completed').length,
+    [maintenanceRequests]
+  );
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (residences.length === 0) {
     return (
-      <div className="py-20 lg:py-28">
-        <div className="max-w-md mx-auto px-4 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto mb-6"><Building2 className="w-7 h-7 text-primary" /></div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">No Buildings Yet</h2>
-          <p className="text-sm text-muted-foreground mb-8">Set up your first building to get started with ResLiving.</p>
-          <Link to="/get-started"><Button size="lg" className="bg-destructive hover:bg-destructive/90 text-white h-12 px-8 text-base font-semibold"><Plus className="w-4 h-4 mr-2" />Set Up Your Building</Button></Link>
+      <div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <h1 className="text-2xl font-bold text-foreground">
+            Manager Dashboard
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Welcome back
+            {user?.user_metadata?.full_name
+              ? `, ${user.user_metadata.full_name}`
+              : ''}
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="p-6 rounded-2xl border border-border bg-card">
+            <h3 className="text-sm font-semibold text-foreground mb-3">
+              Building Info
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              No building has been set up yet.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl border border-border bg-card">
+            <h3 className="text-sm font-semibold text-foreground mb-3">
+              Subscription
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Subscription details will appear after building setup.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl border border-border bg-card">
+            <h3 className="text-sm font-semibold text-foreground mb-3">
+              Quick Actions
+            </h3>
+            <div className="space-y-2">
+              <Link to="/get-started">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start"
+                >
+                  <Plus className="w-3.5 h-3.5 mr-2" />
+                  Set Up Your First Building
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
+
+        <button
+          onClick={() => navigate('/manager/maintenance')}
+          className="mt-6 w-full text-left p-6 rounded-2xl border border-border bg-card hover:border-primary/30 transition-colors"
+        >
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-2">
+              <Wrench className="w-4 h-4 text-primary" />
+              <h3 className="text-base font-semibold text-foreground">
+                Maintenance Requests
+              </h3>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </div>
+
+          <div className="rounded-xl border border-dashed border-border p-6 text-center">
+            <p className="text-sm font-medium text-foreground">
+              No maintenance requests yet
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Requests will appear here once residents are linked and begin submitting them.
+            </p>
+          </div>
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="py-10 lg:py-16">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Manager Dashboard</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Welcome back{user?.user_metadata?.full_name ? `, ${user.user_metadata.full_name}` : ''}</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <ResidenceSelector residences={residences} selectedId={selectedId} onSelect={setSelectedId} />
-            <Button variant="ghost" size="sm" onClick={handleLogout}><LogOut className="w-4 h-4" /></Button>
-          </div>
-        </motion.div>
+    <div>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8"
+      >
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">
+            Manager Dashboard
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Welcome back
+            {user?.user_metadata?.full_name
+              ? `, ${user.user_metadata.full_name}`
+              : ''}
+          </p>
+        </div>
 
-        {selectedResidence && (
-          <motion.div key={selectedId} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-              <div className="p-6 rounded-2xl border border-border bg-card">
-                <h3 className="text-sm font-semibold text-foreground mb-3">Building Info</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between"><span className="text-muted-foreground">Name</span><span className="font-medium">{selectedResidence.building_name}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Address</span><span className="font-medium text-right max-w-[60%]">{selectedResidence.building_address}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Total units</span><span className="font-medium">{selectedResidence.number_of_units}</span></div>
+        <div className="flex items-center gap-3">
+          <ResidenceSelector
+            residences={residences}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+          />
+        </div>
+      </motion.div>
+
+      {selectedResidence && (
+        <motion.div
+          key={selectedId}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div className="p-6 rounded-2xl border border-border bg-card">
+              <h3 className="text-sm font-semibold text-foreground mb-3">
+                Building Info
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Name</span>
+                  <span className="font-medium">
+                    {selectedResidence.building_name}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Address</span>
+                  <span className="font-medium text-right max-w-[60%]">
+                    {selectedResidence.building_address}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total units</span>
+                  <span className="font-medium">
+                    {selectedResidence.number_of_units}
+                  </span>
                 </div>
               </div>
-              <SubscriptionCard residence={selectedResidence} />
-              <div className="p-6 rounded-2xl border border-border bg-card">
-                <h3 className="text-sm font-semibold text-foreground mb-3">Quick Actions</h3>
-                <div className="space-y-2"><Link to="/get-started"><Button variant="outline" size="sm" className="w-full justify-start"><Plus className="w-3.5 h-3.5 mr-2" />Add Another Building</Button></Link></div>
+            </div>
+
+            <SubscriptionCard residence={selectedResidence} />
+
+            <div className="p-6 rounded-2xl border border-border bg-card">
+              <h3 className="text-sm font-semibold text-foreground mb-3">
+                Quick Actions
+              </h3>
+              <div className="space-y-2">
+                <Link to="/get-started">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
+                    <Plus className="w-3.5 h-3.5 mr-2" />
+                    Add Another Building
+                  </Button>
+                </Link>
               </div>
             </div>
-            <CodeDisplay residence={selectedResidence} units={units} />
-          </motion.div>
-        )}
-      </div>
+          </div>
+
+          <button
+            onClick={() => navigate('/manager/maintenance')}
+            className="mt-6 w-full text-left p-6 rounded-2xl border border-border bg-card hover:border-primary/30 transition-colors"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
+              <div className="flex items-center gap-2">
+                <Wrench className="w-4 h-4 text-primary" />
+                <h3 className="text-base font-semibold text-foreground">
+                  Maintenance Requests
+                </h3>
+              </div>
+
+              <div className="flex gap-2 text-xs">
+                <span className="inline-flex items-center rounded-full px-2.5 py-1 bg-primary/10 text-primary font-medium">
+                  Pending ({pendingCount})
+                </span>
+                <span className="inline-flex items-center rounded-full px-2.5 py-1 bg-muted text-foreground font-medium">
+                  Completed ({completedCount})
+                </span>
+              </div>
+            </div>
+
+            {maintenanceLoading ? (
+              <div className="py-6 flex items-center justify-center">
+                <div className="w-6 h-6 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+              </div>
+            ) : recentMaintenance.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border p-6 text-center">
+                <p className="text-sm font-medium text-foreground">
+                  No maintenance requests yet
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Click to open the full maintenance page when requests start coming in.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {recentMaintenance.map((request) => (
+                  <div
+                    key={request.id}
+                    className="rounded-xl border border-border p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-primary/10 text-primary capitalize">
+                            {request.status}
+                          </span>
+                          <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-muted text-foreground capitalize">
+                            {request.category}
+                          </span>
+                        </div>
+
+                        <p className="text-sm font-semibold text-foreground mt-2 truncate">
+                          Unit {request.unit_number} · {request.student_name || 'Student'}
+                        </p>
+
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+                          {request.details}
+                        </p>
+                      </div>
+
+                      <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </button>
+
+          <CodeDisplay residence={selectedResidence} units={units} />
+        </motion.div>
+      )}
     </div>
   );
 }

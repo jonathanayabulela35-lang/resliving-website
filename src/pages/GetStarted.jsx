@@ -1,19 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import StepIndicator from '../components/setup/StepIndicator';
 import BuildingDetailsStep from '../components/setup/BuildingDetailsStep';
 import ChooseCodesStep from '../components/setup/ChooseCodesStep';
 import ReviewStep from '../components/setup/ReviewStep';
 import PaymentStep from '../components/setup/PaymentStep';
-import { generateSecurityCode, generateUnitCode, generateUnitLabels } from '../lib/codeGenerator';
-import { api } from '@/lib/api';
 import { useAuth } from '@/lib/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 const PRICE_PER_CODE = 150;
 
 export default function GetStarted() {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [data, setData] = useState({
@@ -42,37 +39,44 @@ export default function GetStarted() {
   }, [user?.email, user?.user_metadata?.full_name]);
 
   const handleComplete = async () => {
-    const securityCode = generateSecurityCode();
     const codeLimit = data.student_code_limit || 1;
     const total = codeLimit * PRICE_PER_CODE;
-    const startDate = new Date();
-    const expiryDate = new Date();
-    expiryDate.setMonth(expiryDate.getMonth() + 1);
 
-    const residence = await api.entities.Residence.create({
-      ...data,
-      security_code: securityCode,
-      student_code_limit: codeLimit,
-      codes_purchased: codeLimit,
-      subscription_status: 'active',
-      subscription_expires_at: expiryDate.toISOString(),
-      billing_cycle_start: startDate.toISOString(),
-      billing_cycle_end: expiryDate.toISOString(),
-      last_payment_date: startDate.toISOString(),
-      owner_email: user?.email,
-      monthly_total: total,
-    });
+    const payload = {
+      building_name: data.building_name,
+      building_address: data.building_address,
+      number_of_units: Number(data.number_of_units || 0),
+      numbering_format: data.numbering_format,
+      manager_name: data.manager_name,
+      manager_email: data.manager_email || user?.email,
+      manager_phone: data.manager_phone,
+      emergency_ambulance: data.emergency_ambulance,
+      emergency_fire: data.emergency_fire,
+      emergency_police: data.emergency_police,
+      max_visitors: Number(data.max_visitors || 0),
+      sleepover_fee: Number(data.sleepover_fee || 0),
+      house_rules_url: data.house_rules_url || '',
+      student_code_limit: Number(codeLimit),
+      monthly_total: Number(total),
+      owner_email: user?.email || data.manager_email,
+    };
 
-    const labels = generateUnitLabels(codeLimit, data.numbering_format);
-    const units = labels.map((label) => ({
-      residence_id: residence.id,
-      unit_label: label,
-      unit_code: generateUnitCode(),
-      is_active: true,
-    }));
+    const { data: result, error } = await supabase.functions.invoke(
+      'initialize-paystack-subscription',
+      {
+        body: payload,
+      }
+    );
 
-    await api.entities.Unit.bulkCreate(units);
-    navigate('/dashboard');
+    if (error) {
+      throw new Error(error.message || 'Failed to start Paystack checkout.');
+    }
+
+    if (!result?.authorization_url) {
+      throw new Error('No Paystack checkout URL was returned.');
+    }
+
+    window.location.href = result.authorization_url;
   };
 
   return (

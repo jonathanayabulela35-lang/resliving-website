@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 const TABLES = {
   Residence: 'residences',
   Unit: 'units',
+  MaintenanceRequest: 'maintenance_requests',
 };
 
 function normalizeResidence(row) {
@@ -31,9 +32,19 @@ function normalizeUnit(row) {
   };
 }
 
+function normalizeMaintenanceRequest(row) {
+  if (!row) return row;
+  return {
+    ...row,
+    created_date: row.created_at,
+    updated_date: row.updated_at,
+  };
+}
+
 function normalize(table, row) {
   if (table === 'residences') return normalizeResidence(row);
   if (table === 'units') return normalizeUnit(row);
+  if (table === 'maintenance_requests') return normalizeMaintenanceRequest(row);
   return row;
 }
 
@@ -59,7 +70,8 @@ function mapResidencePayload(payload) {
     student_code_limit: payload.student_code_limit,
     codes_purchased: payload.codes_purchased ?? payload.student_code_limit,
     billing_cycle_start: payload.billing_cycle_start,
-    billing_cycle_end: payload.billing_cycle_end ?? payload.subscription_expires_at,
+    billing_cycle_end:
+      payload.billing_cycle_end ?? payload.subscription_expires_at,
     last_payment_date: payload.last_payment_date,
     owner_email: payload.owner_email ?? payload.manager_email,
   };
@@ -72,6 +84,21 @@ function mapUnitPayload(payload) {
     unit_number: payload.unit_label ?? payload.unit_number,
     unit_code: payload.unit_code,
     is_occupied: payload.is_occupied ?? false,
+  };
+}
+
+function mapMaintenanceRequestPayload(payload) {
+  if (!payload) return payload;
+  return {
+    residence_id: payload.residence_id,
+    unit_id: payload.unit_id,
+    unit_number: payload.unit_number,
+    student_email: payload.student_email,
+    student_name: payload.student_name,
+    category: payload.category,
+    details: payload.details,
+    image_url: payload.image_url,
+    status: payload.status,
   };
 }
 
@@ -117,8 +144,21 @@ async function signOut() {
   if (error) throw error;
 }
 
+async function notifyMaintenance(payload) {
+  const { data, error } = await supabase.functions.invoke(
+    'notify-maintenance',
+    {
+      body: payload,
+    }
+  );
+
+  if (error) throw error;
+  return data;
+}
+
 function entity(name) {
   const table = TABLES[name];
+
   return {
     async list() {
       const { data, error } = await supabase.from(table).select('*');
@@ -132,14 +172,21 @@ function entity(name) {
       Object.entries(criteria).forEach(([key, value]) => {
         if (value === undefined || value === null || value === '') return;
 
-        const columnMap =
-          table === 'residences'
-            ? {
-                building_name: 'name',
-                building_address: 'address',
-                number_of_units: 'num_units',
-              }
-            : { unit_label: 'unit_number' };
+        let columnMap = {};
+
+        if (table === 'residences') {
+          columnMap = {
+            building_name: 'name',
+            building_address: 'address',
+            number_of_units: 'num_units',
+          };
+        }
+
+        if (table === 'units') {
+          columnMap = {
+            unit_label: 'unit_number',
+          };
+        }
 
         query = query.eq(columnMap[key] || key, value);
       });
@@ -157,10 +204,13 @@ function entity(name) {
     },
 
     async create(payload) {
-      const mapped =
-        table === 'residences'
-          ? mapResidencePayload(payload)
-          : mapUnitPayload(payload);
+      let mapped = payload;
+
+      if (table === 'residences') mapped = mapResidencePayload(payload);
+      if (table === 'units') mapped = mapUnitPayload(payload);
+      if (table === 'maintenance_requests') {
+        mapped = mapMaintenanceRequestPayload(payload);
+      }
 
       const { data, error } = await supabase
         .from(table)
@@ -173,11 +223,14 @@ function entity(name) {
     },
 
     async bulkCreate(payloads) {
-      const mapped = payloads.map((payload) =>
-        table === 'residences'
-          ? mapResidencePayload(payload)
-          : mapUnitPayload(payload)
-      );
+      const mapped = payloads.map((payload) => {
+        if (table === 'residences') return mapResidencePayload(payload);
+        if (table === 'units') return mapUnitPayload(payload);
+        if (table === 'maintenance_requests') {
+          return mapMaintenanceRequestPayload(payload);
+        }
+        return payload;
+      });
 
       const { data, error } = await supabase
         .from(table)
@@ -189,10 +242,13 @@ function entity(name) {
     },
 
     async update(id, payload) {
-      const mapped =
-        table === 'residences'
-          ? mapResidencePayload(payload)
-          : mapUnitPayload(payload);
+      let mapped = payload;
+
+      if (table === 'residences') mapped = mapResidencePayload(payload);
+      if (table === 'units') mapped = mapUnitPayload(payload);
+      if (table === 'maintenance_requests') {
+        mapped = mapMaintenanceRequestPayload(payload);
+      }
 
       const { data, error } = await supabase
         .from(table)
@@ -232,6 +288,11 @@ async function uploadAsset({
 
 export const api = {
   auth: { getUser, signIn, signUp, signOut },
-  entities: { Residence: entity('Residence'), Unit: entity('Unit') },
+  entities: {
+    Residence: entity('Residence'),
+    Unit: entity('Unit'),
+    MaintenanceRequest: entity('MaintenanceRequest'),
+  },
   storage: { uploadAsset },
+  functions: { notifyMaintenance },
 };

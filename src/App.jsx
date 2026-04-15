@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'r
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import Layout from './components/Layout';
+import ManagerLayout from './components/manager/ManagerLayout';
 import Home from './pages/Home';
 import HowItWorks from './pages/HowItWorks';
 import Features from './pages/Features';
@@ -13,6 +14,11 @@ import Contact from './pages/Contact';
 import GetStarted from './pages/GetStarted';
 import Dashboard from './pages/Dashboard';
 import ManagerLogin from './pages/ManagerLogin';
+import Visitors from './pages/Visitors';
+import Messages from './pages/Messages';
+import Community from './pages/Community';
+import Settings from './pages/Settings';
+import Maintenance from './pages/Maintenance';
 
 function LoadingScreen() {
   return (
@@ -47,7 +53,7 @@ function PublicOnlyRoute({ children }) {
   if (isLoadingAuth) return <LoadingScreen />;
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/manager/dashboard" replace />;
   }
 
   return children;
@@ -78,14 +84,25 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
-          path="/dashboard"
+          path="/manager"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <ManagerLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<Navigate to="/manager/dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="maintenance" element={<Maintenance />} />
+          <Route path="visitors" element={<Visitors />} />
+          <Route path="messages" element={<Messages />} />
+          <Route path="community" element={<Community />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+
+        <Route path="/dashboard" element={<Navigate to="/manager/dashboard" replace />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>

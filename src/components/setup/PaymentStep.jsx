@@ -1,20 +1,26 @@
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CreditCard, Lock } from "lucide-react";
+import { ArrowLeft, CreditCard, Lock, RefreshCcw } from "lucide-react";
 
 const PRICE_PER_CODE = 150;
 
 export default function PaymentStep({ data, onBack, onComplete }) {
   const [processing, setProcessing] = useState(false);
-  const total = (data.student_code_limit || 1) * PRICE_PER_CODE;
+  const [notice, setNotice] = useState("");
+
+  const codeCount = data.student_code_limit || 1;
+  const total = codeCount * PRICE_PER_CODE;
 
   const handlePayment = async () => {
-    setProcessing(true);
-    // Simulated payment processing
-    await new Promise((r) => setTimeout(r, 2000));
-    onComplete();
+    try {
+      setProcessing(true);
+      setNotice("");
+
+      await onComplete();
+    } catch (error) {
+      setNotice(error?.message || "Unable to start Paystack checkout.");
+      setProcessing(false);
+    }
   };
 
   return (
@@ -24,51 +30,72 @@ export default function PaymentStep({ data, onBack, onComplete }) {
           <CreditCard className="w-5 h-5 text-destructive" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-foreground">Payment</h2>
-          <p className="text-sm text-muted-foreground">Complete your purchase to activate your building</p>
+          <h2 className="text-xl font-bold text-foreground">Monthly Subscription</h2>
+          <p className="text-sm text-muted-foreground">
+            Start your monthly ResLiving subscription with Paystack
+          </p>
         </div>
       </div>
 
       <div className="space-y-5">
-        {/* Amount due */}
         <div className="p-5 rounded-2xl border border-destructive/10 bg-destructive/[0.02] text-center">
-          <p className="text-sm text-muted-foreground mb-1">Amount Due Today</p>
+          <p className="text-sm text-muted-foreground mb-1">Monthly Amount</p>
           <p className="text-4xl font-bold text-primary">R{total.toLocaleString()}</p>
-          <p className="text-xs text-muted-foreground mt-1">{data.student_code_limit} student codes + 1 security code</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {codeCount} student codes billed monthly + 1 security code included
+          </p>
         </div>
 
-        {/* Card form (placeholder) */}
         <div className="p-6 rounded-2xl border border-border bg-card space-y-4">
-          <div>
-            <Label className="text-sm font-medium mb-1.5 block">Card Number</Label>
-            <Input placeholder="4242 4242 4242 4242" />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="flex items-start gap-3">
+            <RefreshCcw className="w-4 h-4 text-primary mt-0.5" />
             <div>
-              <Label className="text-sm font-medium mb-1.5 block">Expiry Date</Label>
-              <Input placeholder="MM / YY" />
-            </div>
-            <div>
-              <Label className="text-sm font-medium mb-1.5 block">CVC</Label>
-              <Input placeholder="123" />
+              <p className="text-sm font-semibold text-foreground">Recurring billing</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Your selected number of student codes will be billed every month.
+              </p>
             </div>
           </div>
-          <div>
-            <Label className="text-sm font-medium mb-1.5 block">Cardholder Name</Label>
-            <Input placeholder="Name on card" />
+
+          <div className="flex items-start gap-3">
+            <Lock className="w-4 h-4 text-primary mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">Secure Paystack checkout</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                You’ll be redirected to Paystack to complete your first monthly payment securely.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-xl bg-muted/40 p-4">
+            <p className="text-sm font-medium text-foreground mb-2">What happens after payment</p>
+            <ul className="space-y-1 text-sm text-muted-foreground">
+              <li>• Your building subscription is activated</li>
+              <li>• Your security code is generated</li>
+              <li>• Your student codes are generated</li>
+              <li>• Monthly billing continues while the subscription is active</li>
+            </ul>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-muted-foreground justify-center">
-          <Lock className="w-3.5 h-3.5" />
-          <span>Payment is secured and encrypted. This is a demo payment flow.</span>
-        </div>
+        {notice ? (
+          <div className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground">
+            {notice}
+          </div>
+        ) : null}
 
         <div className="flex gap-3">
-          <Button onClick={onBack} variant="outline" size="lg" className="h-12" disabled={processing}>
+          <Button
+            onClick={onBack}
+            variant="outline"
+            size="lg"
+            className="h-12"
+            disabled={processing}
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
+
           <Button
             onClick={handlePayment}
             disabled={processing}
@@ -78,10 +105,10 @@ export default function PaymentStep({ data, onBack, onComplete }) {
             {processing ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Processing Payment...
+                Redirecting to Paystack...
               </div>
             ) : (
-              `Pay R${total.toLocaleString()}`
+              `Continue to Paystack`
             )}
           </Button>
         </div>
