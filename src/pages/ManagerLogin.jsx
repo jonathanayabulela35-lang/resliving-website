@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { useAuth } from '@/lib/AuthContext';
 export default function ManagerLogin() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, signup, loginWithGoogle } = useAuth();
+  const { login, signup, loginWithGoogle, isAuthenticated, isLoadingAuth } = useAuth();
 
   const [mode, setMode] = useState('signin');
   const [fullName, setFullName] = useState('');
@@ -20,6 +20,12 @@ export default function ManagerLogin() {
   const [error, setError] = useState('');
 
   const redirectTo = location.state?.from || '/dashboard';
+
+  useEffect(() => {
+    if (!isLoadingAuth && isAuthenticated) {
+      navigate(redirectTo, { replace: true });
+    }
+  }, [isAuthenticated, isLoadingAuth, navigate, redirectTo]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -79,7 +85,7 @@ export default function ManagerLogin() {
               variant="outline"
               className="w-full h-12 text-base font-semibold"
               onClick={handleGoogleLogin}
-              disabled={googleLoading || loading}
+              disabled={googleLoading || loading || isLoadingAuth}
             >
               {googleLoading ? 'Please wait...' : 'Continue with Google'}
             </Button>
@@ -139,7 +145,7 @@ export default function ManagerLogin() {
             <Button
               type="submit"
               className="w-full bg-destructive hover:bg-destructive/90 text-white h-12 text-base font-semibold"
-              disabled={loading || googleLoading}
+              disabled={loading || googleLoading || isLoadingAuth}
             >
               {loading
                 ? 'Please wait...'
