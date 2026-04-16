@@ -5,7 +5,7 @@ import { api } from '@/lib/api';
 const AuthContext = createContext(null);
 
 function getGoogleRedirectUrl() {
-  return `${window.location.origin}/dashboard`;
+  return `${window.location.origin}/manager/dashboard`;
 }
 
 export function AuthProvider({ children }) {
@@ -19,23 +19,33 @@ export function AuthProvider({ children }) {
       .getSession()
       .then(async ({ data }) => {
         if (!mounted) return;
+
         if (data.session?.user) {
-          const current = await api.auth.me();
+          const current = await api.auth.getUser();
           if (mounted) setUser(current);
+        } else {
+          if (mounted) setUser(null);
         }
+
         if (mounted) setIsLoadingAuth(false);
       })
       .catch(() => {
-        if (mounted) setIsLoadingAuth(false);
+        if (mounted) {
+          setUser(null);
+          setIsLoadingAuth(false);
+        }
       });
 
     const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!mounted) return;
+
       if (session?.user) {
-        const current = await api.auth.me();
+        const current = await api.auth.getUser();
         if (mounted) setUser(current);
-      } else if (mounted) {
-        setUser(null);
+      } else {
+        if (mounted) setUser(null);
       }
+
       if (mounted) setIsLoadingAuth(false);
     });
 
