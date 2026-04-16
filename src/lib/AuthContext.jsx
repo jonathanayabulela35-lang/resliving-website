@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
       .then(async ({ data }) => {
         if (!mounted) return;
         if (data.session?.user) {
-          const current = await api.auth.getUser();
+          const current = await api.auth.me();
           if (mounted) setUser(current);
         }
         if (mounted) setIsLoadingAuth(false);
@@ -31,7 +31,7 @@ export function AuthProvider({ children }) {
 
     const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
-        const current = await api.auth.getUser();
+        const current = await api.auth.me();
         if (mounted) setUser(current);
       } else if (mounted) {
         setUser(null);
