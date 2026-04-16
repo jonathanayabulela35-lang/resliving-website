@@ -15,43 +15,36 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let mounted = true;
 
-    supabase.auth
-      .getSession()
-      .then(async ({ data }) => {
+    const loadSession = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
         if (!mounted) return;
 
-        if (data.session?.user) {
-          const current = await api.auth.getUser();
-          if (mounted) setUser(current);
-        } else {
-          if (mounted) setUser(null);
-        }
-
+        setUser(session?.user ?? null);
+      } catch (error) {
+        if (!mounted) return;
+        setUser(null);
+      } finally {
         if (mounted) setIsLoadingAuth(false);
-      })
-      .catch(() => {
-        if (mounted) {
-          setUser(null);
-          setIsLoadingAuth(false);
-        }
-      });
-
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!mounted) return;
-
-      if (session?.user) {
-        const current = await api.auth.getUser();
-        if (mounted) setUser(current);
-      } else {
-        if (mounted) setUser(null);
       }
+    };
 
-      if (mounted) setIsLoadingAuth(false);
+    loadSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+      setUser(session?.user ?? null);
+      setIsLoadingAuth(false);
     });
 
     return () => {
       mounted = false;
-      sub.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }, []);
 
