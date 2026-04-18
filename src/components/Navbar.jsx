@@ -122,7 +122,7 @@ export default function Navbar() {
                 </Link>
               ))}
 
-              <div className="pt-3 space-y-2">
+              <div className="pt-4 space-y-3">
                 {!isAuthenticated ? (
                   <>
                     <Link to="/manager-login" onClick={() => setMobileOpen(false)}>
@@ -143,16 +143,14 @@ export default function Navbar() {
                   <>
                     <Button
                       variant="outline"
-                      className="w-full"
-                      size="sm"
+                      className="w-full h-12 text-base font-medium"
                       onClick={handleLogout}
                     >
                       Logout
                     </Button>
                     <Link to="/manager/dashboard" onClick={() => setMobileOpen(false)}>
                       <Button
-                        className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-                        size="sm"
+                        className="w-full h-12 text-base font-semibold bg-destructive hover:bg-destructive/90 text-destructive-foreground"
                       >
                         Dashboard
                       </Button>
