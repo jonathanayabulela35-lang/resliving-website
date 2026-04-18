@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Menu,
@@ -41,6 +41,18 @@ export default function Navbar() {
   const { isAuthenticated, logout, user } = useAuth();
 
   const isManagerRoute = location.pathname.startsWith("/manager");
+
+  useEffect(() => {
+    if (mobileOpen && isManagerRoute) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen, isManagerRoute]);
 
   const handleLogout = async () => {
     await logout();
@@ -208,9 +220,9 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "tween", duration: 0.25 }}
-              className="lg:hidden fixed top-0 left-0 z-50 h-screen w-[86%] max-w-[320px] bg-[#D2042D] text-white shadow-xl"
+              className="lg:hidden fixed top-0 left-0 z-50 h-[100dvh] w-[86%] max-w-[320px] overflow-y-auto overscroll-contain bg-[#D2042D] text-white shadow-xl"
             >
-              <div className="flex h-full flex-col px-6 py-6 pt-20">
+              <div className="flex min-h-full flex-col px-6 py-6 pt-20">
                 <div className="pb-6 border-b border-white/15">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">
                     Manager Area
