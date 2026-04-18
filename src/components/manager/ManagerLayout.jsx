@@ -32,7 +32,7 @@ export default function ManagerLayout() {
   return (
     <div className="min-h-[calc(100vh-5rem)] lg:min-h-[calc(100vh-5rem)]">
       <div className="grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] min-h-[calc(100vh-5rem)]">
-        <aside className="bg-[#D2042D] text-white lg:min-h-[calc(100vh-5rem)] lg:sticky lg:top-20">
+        <aside className="hidden lg:block bg-[#D2042D] text-white lg:min-h-[calc(100vh-5rem)] lg:sticky lg:top-20">
           <div className="flex h-full flex-col px-6 py-8">
             <div className="pb-6 border-b border-white/15">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">
