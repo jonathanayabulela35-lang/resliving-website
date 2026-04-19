@@ -19,6 +19,7 @@ import Messages from './pages/Messages';
 import Community from './pages/Community';
 import Settings from './pages/Settings';
 import Maintenance from './pages/Maintenance';
+import PaymentSuccess from './pages/PaymentSuccess';
 
 function LoadingScreen() {
   return (
@@ -95,6 +96,7 @@ function AppRoutes() {
         >
           <Route index element={<Navigate to="/manager/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="dashboard/payment-success" element={<PaymentSuccess />} />
           <Route path="maintenance" element={<Maintenance />} />
           <Route path="visitors" element={<Visitors />} />
           <Route path="messages" element={<Messages />} />

@@ -62,7 +62,7 @@ export default function GetStarted() {
     };
 
     const { data: result, error } = await supabase.functions.invoke(
-      'initialize-paystack-subscription',
+      'initialize-paystack',
       {
         body: payload,
       }
