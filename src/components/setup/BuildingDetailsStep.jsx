@@ -13,6 +13,15 @@ export default function BuildingDetailsStep({ data, setData, onNext }) {
 
   const update = (field, value) => setData((prev) => ({ ...prev, [field]: value }));
 
+  const handleNumberingFormatChange = (value) => {
+    setData((prev) => ({
+      ...prev,
+      numbering_format: value,
+      custom_numbering_format:
+        value === 'custom' ? prev.custom_numbering_format || '' : '',
+    }));
+  };
+
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -35,7 +44,8 @@ export default function BuildingDetailsStep({ data, setData, onNext }) {
     data.number_of_units > 0 &&
     data.manager_name &&
     data.manager_email &&
-    data.manager_phone;
+    data.manager_phone &&
+    (data.numbering_format !== 'custom' || data.custom_numbering_format);
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -84,17 +94,32 @@ export default function BuildingDetailsStep({ data, setData, onNext }) {
             <Label className="text-sm font-medium mb-1.5 block">Numbering Format</Label>
             <Select
               value={data.numbering_format || 'numeric'}
-              onValueChange={(v) => update('numbering_format', v)}
+              onValueChange={handleNumberingFormatChange}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="numeric">Numeric (1, 2, 3...)</SelectItem>
+                <SelectItem value="numeric_101">Numeric (101, 102, 103...)</SelectItem>
                 <SelectItem value="alphanumeric_letter_first">Letter First (A1, A2...)</SelectItem>
                 <SelectItem value="alphanumeric_number_first">Number First (1A, 1B...)</SelectItem>
+                <SelectItem value="custom">Custom format</SelectItem>
               </SelectContent>
             </Select>
+
+            {data.numbering_format === 'custom' && (
+              <div className="mt-3">
+                <Label className="text-sm font-medium mb-1.5 block">
+                  Custom Numbering Format *
+                </Label>
+                <Input
+                  value={data.custom_numbering_format || ''}
+                  onChange={(e) => update('custom_numbering_format', e.target.value)}
+                  placeholder="e.g. Block A - Room 01"
+                />
+              </div>
+            )}
           </div>
         </div>
 
