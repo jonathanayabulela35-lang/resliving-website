@@ -20,6 +20,7 @@ import Community from './pages/Community';
 import Settings from './pages/Settings';
 import Maintenance from './pages/Maintenance';
 import PaymentSuccess from './pages/PaymentSuccess';
+import Privacy from './pages/Privacy'; // ✅ ADDED
 
 function LoadingScreen() {
   return (
@@ -69,6 +70,8 @@ function AppRoutes() {
         <Route path="/features" element={<Features />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<Privacy />} /> {/* ✅ ADDED */}
+
         <Route
           path="/manager-login"
           element={
@@ -77,6 +80,7 @@ function AppRoutes() {
             </PublicOnlyRoute>
           }
         />
+
         <Route
           path="/get-started"
           element={
