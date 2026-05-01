@@ -20,7 +20,8 @@ import Community from './pages/Community';
 import Settings from './pages/Settings';
 import Maintenance from './pages/Maintenance';
 import PaymentSuccess from './pages/PaymentSuccess';
-import Privacy from './pages/Privacy'; // ✅ ADDED
+import Privacy from './pages/Privacy';
+import DeleteAccount from './pages/Delete-Account'; // ✅ ADDED
 
 function LoadingScreen() {
   return (
@@ -70,7 +71,8 @@ function AppRoutes() {
         <Route path="/features" element={<Features />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/privacy" element={<Privacy />} /> {/* ✅ ADDED */}
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/delete-account" element={<DeleteAccount />} /> {/* ✅ ADDED */}
 
         <Route
           path="/manager-login"
