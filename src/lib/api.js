@@ -4,6 +4,7 @@ const TABLES = {
   Residence: 'residences',
   Unit: 'units',
   MaintenanceRequest: 'maintenance_requests',
+  Message: 'messages',
 };
 
 function normalizeResidence(row) {
@@ -292,6 +293,7 @@ export const api = {
     Residence: entity('Residence'),
     Unit: entity('Unit'),
     MaintenanceRequest: entity('MaintenanceRequest'),
+    Message: entity('Message'),
   },
   storage: { uploadAsset },
   functions: { notifyMaintenance },
