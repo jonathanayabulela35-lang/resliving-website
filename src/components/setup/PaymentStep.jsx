@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CreditCard, Lock, RefreshCcw } from "lucide-react";
 
-const PRICE_PER_CODE = 150;
+const PRICE_PER_CODE = 250;
 
 export default function PaymentStep({ data, onBack, onComplete }) {
   const [processing, setProcessing] = useState(false);
@@ -50,9 +50,9 @@ export default function PaymentStep({ data, onBack, onComplete }) {
           <div className="flex items-start gap-3">
             <RefreshCcw className="w-4 h-4 text-primary mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-foreground">Recurring billing</p>
+              <p className="text-sm font-semibold text-foreground">Monthly renewal</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Your selected number of student codes will be billed every month.
+                Your subscription remains active through monthly renewal payments.
               </p>
             </div>
           </div>
@@ -73,7 +73,7 @@ export default function PaymentStep({ data, onBack, onComplete }) {
               <li>• Your building subscription is activated</li>
               <li>• Your security code is generated</li>
               <li>• Your student codes are generated</li>
-              <li>• Monthly billing continues while the subscription is active</li>
+              <li>• Renew monthly to keep your building active</li>
             </ul>
           </div>
         </div>
