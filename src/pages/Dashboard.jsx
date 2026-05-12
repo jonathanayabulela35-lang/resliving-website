@@ -226,7 +226,67 @@ export default function Dashboard() {
 
             <div className="p-6 rounded-2xl border border-border bg-card">
               <h3 className="text-sm font-semibold text-foreground mb-3">Quick Actions</h3>
+
               <div className="space-y-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={async () => {
+                    try {
+                      const payload = {
+                        manager_name: selectedResidence.manager_name,
+                        manager_email: selectedResidence.manager_email,
+                        owner_email: selectedResidence.owner_email,
+
+                        building_name: selectedResidence.building_name,
+                        building_address: selectedResidence.building_address,
+
+                        number_of_units: selectedResidence.number_of_units,
+                        numbering_format: selectedResidence.numbering_format,
+
+                        manager_phone: selectedResidence.manager_phone,
+
+                        emergency_ambulance: selectedResidence.emergency_ambulance,
+                        emergency_fire: selectedResidence.emergency_fire,
+                        emergency_police: selectedResidence.emergency_police,
+
+                        max_visitors: selectedResidence.max_visitors,
+                        sleepover_fee: selectedResidence.sleepover_fee,
+
+                        house_rules_url: selectedResidence.house_rules_url,
+
+                        student_code_limit:
+                          selectedResidence.student_code_limit ||
+                          selectedResidence.codes_purchased,
+
+                        monthly_total: selectedResidence.monthly_total,
+
+                        payment_type: 'renewal',
+                        residence_id: selectedResidence.id,
+                      };
+
+                      const { data, error } = await supabase.functions.invoke(
+                        'initialize-paystack',
+                        {
+                          body: payload,
+                        }
+                      );
+
+                      if (error) throw error;
+
+                      if (data?.authorization_url) {
+                        window.location.href = data.authorization_url;
+                      }
+                    } catch (err) {
+                      console.error('Renewal payment error:', err);
+                      alert('Failed to initialize renewal payment.');
+                    }
+                  }}
+                >
+                  Renew Subscription
+                </Button>
+
                 <Link to="/get-started">
                   <Button
                     size="sm"
@@ -240,7 +300,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* rest unchanged */}
           <CodeDisplay residence={selectedResidence} units={units} />
         </motion.div>
       )}
