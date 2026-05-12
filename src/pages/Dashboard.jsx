@@ -51,7 +51,7 @@ export default function Dashboard() {
         building_address: row.address,
         number_of_units: row.num_units,
         monthly_total:
-          Number(row.codes_purchased || row.student_code_limit || 0) * 150,
+          Number(row.codes_purchased || row.student_code_limit || 0) * 250,
       }));
 
       setResidences(allResidences);
