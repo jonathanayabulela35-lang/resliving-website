@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, Minus, Plus, Shield, Users } from "lucide-react";
 
-const PRICE_PER_CODE = 150;
+const PRICE_PER_CODE = 250;
 
 export default function ChooseCodesStep({ data, setData, onNext, onBack }) {
   const codeCount = data.student_code_limit || 1;
