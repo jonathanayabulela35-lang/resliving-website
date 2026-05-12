@@ -8,7 +8,7 @@ import SectionHeading from "../components/SectionHeading";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 
-const PRICE_PER_CODE = 150;
+const PRICE_PER_CODE = 250;
 
 const included = [
   "Student unit access codes",
