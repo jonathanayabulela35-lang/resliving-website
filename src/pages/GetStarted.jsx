@@ -8,7 +8,7 @@ import PaymentStep from '../components/setup/PaymentStep';
 import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/lib/supabase';
 
-const PRICE_PER_CODE = 150;
+const PRICE_PER_CODE = 250;
 
 const defaultData = (user) => ({
   building_name: '',
