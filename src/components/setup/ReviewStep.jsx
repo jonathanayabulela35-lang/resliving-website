@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, Building2, User, CreditCard, Shield } from "lucide-react";
 
-const PRICE_PER_CODE = 150;
+const PRICE_PER_CODE = 250;
 
 export default function ReviewStep({ data, onNext, onBack }) {
   const total = (data.student_code_limit || 1) * PRICE_PER_CODE;
