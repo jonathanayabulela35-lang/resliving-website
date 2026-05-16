@@ -82,58 +82,6 @@ export default function Messages() {
     }
   };
 
-  const sendPushNotifications = async ({ residenceId, subject, body }) => {
-    const { data: recipients, error } = await supabase
-      .from('profiles')
-      .select('expo_push_token')
-      .eq('residence_id', residenceId)
-      .eq('role', 'student')
-      .not('expo_push_token', 'is', null);
-
-    if (error) throw error;
-
-    const tokens = [
-      ...new Set(
-        (recipients || [])
-          .map((item) => item.expo_push_token)
-          .filter(Boolean)
-      ),
-    ];
-
-    if (!tokens.length) return;
-
-    const pushMessages = tokens.map((token) => ({
-      to: token,
-      sound: 'default',
-      title: subject,
-      body,
-      data: {
-        type: 'manager_message',
-        residence_id: residenceId,
-      },
-    }));
-
-    const response = await fetch('https://exp.host/--/api/v2/push/send', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Accept-encoding': 'gzip, deflate',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(pushMessages),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        result?.errors?.[0]?.message || 'Failed to send push notifications.'
-      );
-    }
-
-    return result;
-  };
-
   const sendMessage = async () => {
     try {
       if (!selectedId) {
@@ -149,18 +97,23 @@ export default function Messages() {
       setSending(true);
       setNotice('');
 
-      await api.entities.Message.create({
+      const createdMessage = await api.entities.Message.create({
         residence_id: selectedId,
         subject: subject.trim(),
         body: body.trim(),
         sent_by: user.email,
       });
 
-      await sendPushNotifications({
-        residenceId: selectedId,
-        subject: subject.trim(),
-        body: body.trim(),
-      });
+      const { error: notificationError } = await supabase.functions.invoke(
+        'send-message-notifications',
+        {
+          body: { message_id: createdMessage.id },
+        }
+      );
+
+      if (notificationError) {
+        throw notificationError;
+      }
 
       setSubject('');
       setBody('');
